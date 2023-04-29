@@ -75,8 +75,7 @@ class SearchActionServer():
             self.closest_object = self.tb3_lidar.min_distance
             self.closest_object_location = self.tb3_lidar.closest_object_position
 
-            # TODO: publish a velocity command to make the robot start moving
-            # DEV: Why to we need to publish a velocity command here repeatedly?
+            # publish a velocity command to make the robot start moving
             self.vel_controller.publish()
 
             # check if there has been a request to cancel the action mid-way through:

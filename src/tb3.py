@@ -56,7 +56,20 @@ class Tb3LaserScan(object):
         arc_angles = np.arange(-20, 21)
         self.closest_object_position = arc_angles[np.argmin(front_arc)]
 
+        sector_angle = int(360/self.n_sectors)
+        for i in range(self.n_sectors):
+            sector_scan_data = scan_data.ranges[i*sector_angle:(i+1)*sector_angle]
+            min_distance = min(sector_scan_data)
+            min_index = sector_scan_data.index(min_distance)
+            angle_increment = scan_data.angle_increment
+            min_angle = i*sector_angle + min_index*angle_increment
+            self.sector[i] = {"id": i, "min_distance": min_distance, "min_angle": min_angle}
+    
+
     def __init__(self):
+        self.n_sectors = 8
+        self.sector = [{} for _ in range(self.n_sectors)]
+
         self.min_distance = 0.0
         self.closest_object_position = 0.0 # degrees
         self.subscriber = rospy.Subscriber('/scan', LaserScan, self.laserscan_cb) 
