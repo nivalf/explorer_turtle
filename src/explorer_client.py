@@ -44,22 +44,27 @@ class ExplorerActionClient():
         # TODO: Print the result here...
         print(f"RESULT: Action State = {self.move_fwd_client.get_state()}")
         print(f"RESULT: Total Distance Travelled: {self.distance}m")
+        self.action_complete = True
 
     def main_loop(self):
-        # assign values to all goal parameters
-        # and send the goal to the action server...
-        self.search_goal.fwd_velocity = 0.1
-        self.search_goal.approach_distance = 0.3
+        while not rospy.is_shutdown():
+            # assign values to all goal parameters
+            # and send the goal to the action server...
+            self.search_goal.fwd_velocity = 0.1
+            self.search_goal.approach_distance = 0.3
 
-        self.move_fwd_client.send_goal(self.search_goal, feedback_cb=self.feedback_callback)
+            self.move_fwd_client.send_goal(self.search_goal, feedback_cb=self.feedback_callback)
 
-        while self.move_fwd_client.get_state() < 2:
-            self.rate.sleep()
+            while self.move_fwd_client.get_state() < 2:
+                self.rate.sleep()
 
-        self.action_complete = True
+            self.action_complete = True
 
 
 if __name__ == '__main__':
-    # TODO: Instantiate the node and call the main_loop() method from it...
-    client_instance = ExplorerActionClient()
-    client_instance.main_loop()
+    try:
+        # Instantiate the node and call the main_loop() method from it...
+        client_instance = ExplorerActionClient()
+        client_instance.main_loop()
+    except rospy.ROSInterruptException:
+        pass
