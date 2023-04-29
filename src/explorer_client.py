@@ -6,7 +6,7 @@ import actionlib
 
 from tuos_ros_msgs.msg import SearchAction, SearchGoal, SearchFeedback
 
-move_fwd_action_server_name = "/move_fwd_obs_avoid_server"
+move_fwd_action_server_name = "/move_fwd_oa_server"
 
 
 class ExplorerActionClient():

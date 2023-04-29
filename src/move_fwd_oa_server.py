@@ -22,7 +22,7 @@ class MoveForwardActionServer():
     def __init__(self):
         # TODO: create a "simple action server" with a callback function, and start it...
         self.actionserver = actionlib.SimpleActionServer(
-            "move_fwd_obs_avoid_server", SearchAction, self.action_server_launcher, auto_start=False)
+            "move_fwd_oa_server", SearchAction, self.action_server_launcher, auto_start=False)
         self.actionserver.start()
 
         # pull in some useful publisher/subscriber functions from the tb3.py module:
@@ -48,7 +48,7 @@ class MoveForwardActionServer():
 
         # TODO: Print a message to indicate that the requested goal was valid
         print(f"\n#####\n"
-            f"The 'move_fwd_obs_avoid_server' has been called.\n"
+            f"The 'move_fwd_oa_server' has been called.\n"
             f"Goal: Move forward with {fwd_velocity:.2f} m/s velocity and stop at {approach_distance:.2f} distance from the object ...\n\n"
             f"Commencing the action...\n"
             f"#####\n")
@@ -142,6 +142,6 @@ class MoveForwardActionServer():
 
 
 if __name__ == '__main__':
-    rospy.init_node("move_fwd_obs_avoid_server")
+    rospy.init_node("move_fwd_oa_server")
     MoveForwardActionServer()
     rospy.spin()
