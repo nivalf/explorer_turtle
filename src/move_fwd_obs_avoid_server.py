@@ -15,14 +15,14 @@ from tb3 import Tb3Move, Tb3Odometry, Tb3LaserScan
 from math import sqrt, pow
 
 
-class ExplorerActionServer():
+class MoveForwardActionServer():
     feedback = SearchFeedback()
     result = SearchResult()
 
     def __init__(self):
         # TODO: create a "simple action server" with a callback function, and start it...
         self.actionserver = actionlib.SimpleActionServer(
-            "explorer_action_server", SearchAction, self.action_server_launcher, auto_start=False)
+            "move_fwd_obs_avoid_server", SearchAction, self.action_server_launcher, auto_start=False)
         self.actionserver.start()
 
         # pull in some useful publisher/subscriber functions from the tb3.py module:
@@ -30,7 +30,7 @@ class ExplorerActionServer():
         self.tb3_odom = Tb3Odometry()
         self.tb3_lidar = Tb3LaserScan()
 
-        rospy.loginfo("The 'Explorer Action Server' is active...")
+        rospy.loginfo("The 'Move Forward Obstacle Avoidance Action Server' is active...")
 
     # The action's "callback function":
     def action_server_launcher(self, goal: SearchGoal):
@@ -39,41 +39,22 @@ class ExplorerActionServer():
         fwd_velocity = goal.fwd_velocity
         approach_distance = goal.approach_distance
 
-        # TODO: Implement some checks on the "goal" input parameter(s)
-        success = True
 
-        # Handle invalid requests
-        if approach_distance < 0:
-            print(f'Invalid approach distance {approach_distance:.2f}m. Please choose a distance between 0.12m and 3.5m.')
-            success = False
-        elif approach_distance < 0.12:
-            print('The laser range finder has a minimum range of 0.12m. Please choose a distance between 0.12m and 3.5m.')
-            success = False
-        elif approach_distance >= 3.5:
-            print('The laser range finder has a maximum range of 3.5m. Please choose a distance between 0.12m and 3.5m.')
-            success = False
-        
-        if fwd_velocity < 0:
-            print(f'Invalid approach velocity {fwd_velocity:.2f}m/s.')
-            success = False
-        elif fwd_velocity > 0.26:
-            print(f'The maximum linear velocity of the robot is 0.26m/s. Please choose a smaller approach velocity.')
-            success = False
-
-        if not success:
-            # TODO: abort the action server if an invalid goal has been requested...
+        if not self.is_req_valid(goal):
+            # abort the action server if an invalid goal has been requested...
             # DEV: Add a message. Figure out how to do this.
-            print(f'Not success')
             self.actionserver.set_aborted()
             return
 
         # TODO: Print a message to indicate that the requested goal was valid
         print(f"\n#####\n"
-            f"The 'explorer_action_server' has been called.\n"
+            f"The 'move_fwd_obs_avoid_server' has been called.\n"
             f"Goal: Move forward with {fwd_velocity:.2f} m/s velocity and stop at {approach_distance:.2f} distance from the object ...\n\n"
             f"Commencing the action...\n"
             f"#####\n")
         
+        # Flag for status of the action
+        success = True
 
         # Get the robot's current odometry from the Tb3Odometry() class:
         self.posx0 = self.tb3_odom.posx
@@ -132,8 +113,35 @@ class ExplorerActionServer():
             self.actionserver.set_succeeded(self.result)
             self.vel_controller.stop()
 
+    # Handle invalid requests
+    def is_req_valid(self, goal: SearchGoal):
+        fwd_velocity = goal.fwd_velocity
+        approach_distance = goal.approach_distance
+        
+        # Implement some checks on the "goal" input parameter(s)
+        is_valid = True
+
+        if approach_distance < 0:
+            print(f'Invalid approach distance {approach_distance:.2f}m. Please choose a distance between 0.12m and 3.5m.')
+            is_valid = False
+        elif approach_distance < 0.12:
+            print(f'Invalid approach distance {approach_distance:.2f}m. The laser range finder has a minimum range of 0.12m. Please choose a distance between 0.12m and 3.5m.')
+            is_valid = False
+        elif approach_distance >= 3.5:
+            print(f'Invalid approach distance {approach_distance:.2f}m. The laser range finder has a maximum range of 3.5m. Please choose a distance between 0.12m and 3.5m.')
+            is_valid = False
+        
+        if fwd_velocity < 0:
+            print(f'Invalid approach velocity {fwd_velocity:.2f}m/s.')
+            is_valid = False
+        elif fwd_velocity > 0.26:
+            print(f'Invalid approach velocity {fwd_velocity:.2f}m/s. The maximum linear velocity of the robot is 0.26m/s. Please choose a smaller approach velocity.')
+            is_valid = False
+
+        return is_valid
+
 
 if __name__ == '__main__':
-    rospy.init_node("explorer_action_server")
-    ExplorerActionServer()
+    rospy.init_node("move_fwd_obs_avoid_server")
+    MoveForwardActionServer()
     rospy.spin()
