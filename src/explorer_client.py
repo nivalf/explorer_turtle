@@ -5,45 +5,63 @@ import rospy
 import actionlib
 
 from tuos_ros_msgs.msg import SearchAction, SearchGoal, SearchFeedback
+from turtlebot_explorer.msg import FindFreeSpaceAction, FindFreeSpaceGoal, FindFreeSpaceFeedback
 
 search_action_server_name = "/search_action_server"
+find_free_space_action_server_name = "/find_free_space_action_server"
 
 
 class ExplorerActionClient():
     search_goal = SearchGoal()
+    find_free_space_goal = FindFreeSpaceGoal()
 
-    def feedback_callback(self, feedback_data: SearchFeedback):
-        # TODO: get the current distance travelled, from the feedback message
+    def search_feedback_callback(self, feedback_data: SearchFeedback):
+        # get the current distance travelled, from the feedback message
         # and assign this to a class variable...
         self.distance = feedback_data.current_distance_travelled
         print(f"FEEDBACK: Current distance travelled: {self.distance}m. ")
 
+
+    def find_free_space_feedback_cb(self, feedback_data: FindFreeSpaceFeedback):
+        # get the current angle turned, from the feedback message
+        # and assign this to a class variable...
+        self.angle = feedback_data.current_angle_turned
+        print(f"FEEDBACK: Current angle turned: {self.angle} degrees. ")
+
     def __init__(self):
         self.distance = 0.0
+        self.angle = 0.0
 
         self.action_complete = False
-        rospy.init_node("search_action_client")
+        rospy.init_node("explorer_client")
         self.rate = rospy.Rate(1)
 
-        # TODO: setup a "simple action client" with a callback function
+        # setup a "simple action client" with a callback function
         # and wait for the server to be available...
-        self.move_fwd_client = actionlib.SimpleActionClient(search_action_server_name,
+        self.search_client = actionlib.SimpleActionClient(search_action_server_name,
                                                    SearchAction)
-        self.move_fwd_client.wait_for_server()
+        self.search_client.wait_for_server()
+
+        # Setup client for finding free space
+        self.find_free_space_client = actionlib.SimpleActionClient(find_free_space_action_server_name, FindFreeSpaceAction)
+        self.find_free_space_client.wait_for_server()
 
         rospy.on_shutdown(self.shutdown_ops)
 
     def shutdown_ops(self):
         if not self.action_complete:
             rospy.logwarn("Received a shutdown request. Cancelling Goal...")
-            # TODO: cancel the goal request, if this node is shutdown before the action has completed...
-            self.move_fwd_client.cancel_goal()
+            # cancel the goal request, if this node is shutdown before the action has completed...
+            self.search_client.cancel_goal()
+            self.find_free_space_client.cancel_goal()
 
             rospy.logwarn("Goal Cancelled...")
 
         # TODO: Print the result here...
-        print(f"RESULT: Action State = {self.move_fwd_client.get_state()}")
+        print(f"RESULT: Search Action State = {self.search_client.get_state()}")
         print(f"RESULT: Total Distance Travelled: {self.distance}m")
+        print(f"RESULT: Find Free Space Action State = {self.find_free_space_client.get_state()}")
+        print(f"RESULT: Total Angle Turned: {self.angle} degrees")
         self.action_complete = True
 
     def main_loop(self):
@@ -53,10 +71,21 @@ class ExplorerActionClient():
             self.search_goal.fwd_velocity = 0.1
             self.search_goal.approach_distance = 0.3
 
-            self.move_fwd_client.send_goal(self.search_goal, feedback_cb=self.feedback_callback)
+            self.find_free_space_goal.ang_velocity = 1
+            self.find_free_space_goal.min_clear_distance = 0.6
 
-            while self.move_fwd_client.get_state() < 2:
-                self.rate.sleep()
+            while True:
+
+
+                self.search_client.send_goal(self.search_goal, feedback_cb=self.search_feedback_callback)
+
+                while self.search_client.get_state() < 2:
+                    self.rate.sleep()
+
+                self.find_free_space_client.send_goal(self.find_free_space_goal, feedback_cb=self.find_free_space_feedback_cb)
+                
+                while self.find_free_space_client.get_state() < 2:
+                    self.rate.sleep()
 
             self.action_complete = True
 

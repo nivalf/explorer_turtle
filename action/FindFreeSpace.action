@@ -11,4 +11,4 @@ float32 turned_angle  # The angle turned by the robot to face the free space (de
 
 ---
 # Define the feedback for the action
-float32 current_angle  # The current angle of the robot as it turns (degrees)
+float32 current_angle_turned  # The current angle of the robot as it turns (degrees)

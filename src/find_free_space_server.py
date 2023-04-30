@@ -97,7 +97,7 @@ class FindFreeSpaceActionServer():
                 pow(self.posx0 - self.tb3_odom.posx, 2) + pow(self.posy0 - self.tb3_odom.posy, 2))
 
             # DEV TODO: update all feedback message values and publish a feedback message:
-            self.feedback.current_angle = 0
+            self.feedback.current_angle_turned = 0
             self.actionserver.publish_feedback(self.feedback)
 
 
@@ -109,7 +109,7 @@ class FindFreeSpaceActionServer():
             # DEV TODO: update all result parameters:
             self.result.success = success
             self.result.turned_angle = 0
-            
+
             # TODO: Set the action server to "succeeded" and stop the robot...
             self.actionserver.set_succeeded(self.result)
             self.vel_controller.stop()
