@@ -68,7 +68,7 @@ class ExplorerActionClient():
         while not rospy.is_shutdown():
             # assign values to all goal parameters
             # and send the goal to the action server...
-            self.search_goal.fwd_velocity = 0.1
+            self.search_goal.fwd_velocity = 0.15
             self.search_goal.approach_distance = 0.3
 
             self.find_free_space_goal.ang_velocity = 1
