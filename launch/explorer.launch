@@ -17,10 +17,10 @@
     </include>
 
     <!-- rviz -->
-        <group if="$(arg open_rviz)"> 
-            <node pkg="rviz" type="rviz" name="rviz" required="true"
-                args="-d $(find turtlebot3_slam)/rviz/turtlebot3_$(arg slam_methods).rviz"/>
-        </group>
+    <group if="$(arg open_rviz)"> 
+        <node pkg="rviz" type="rviz" name="rviz" required="true"
+            args="-d $(find turtlebot3_slam)/rviz/turtlebot3_$(arg slam_methods).rviz"/>
+    </group>
 
     <!-- Demo arena Gazebo -->
     <include file="$(find acs6121)/launch/arena.launch" />
@@ -31,12 +31,5 @@
     <node pkg="turtlebot_explorer" type="find_free_space_server.py" name="find_free_space_server" output="screen"/>
     <!-- Explorer client -->
     <node pkg="turtlebot_explorer" type="explorer_client.py" name="explorer_client" output="screen"/>
-
-
-
-
-
-
-
   
 </launch>
