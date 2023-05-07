@@ -1,7 +1,7 @@
 # Define the FindFreeSpace action
 
 # Define the goal of the action
-float32 ang_velocity    # The desired angular velocity of the robot (rad/s)
+float32 ang_velocity_magnitude    # Magniture of the desired angular velocity of the robot (rad/s)
 float32 min_clear_distance    # The minimum distance to be considered a free space (meters)
 
 ---

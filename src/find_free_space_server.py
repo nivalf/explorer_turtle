@@ -37,7 +37,7 @@ class FindFreeSpaceActionServer():
         try:
             rate = rospy.Rate(10)
 
-            ang_velocity = goal.ang_velocity
+            ang_velocity_magnitude = goal.ang_velocity_magnitude
             min_clear_distance = goal.min_clear_distance
 
 
@@ -50,7 +50,7 @@ class FindFreeSpaceActionServer():
             # TODO: Print a message to indicate that the requested goal was valid
             print(f"\n#####\n"
                 f"The 'find_free_space_action_server' has been called.\n"
-                f"Goal: Find free space with mininum free space of {min_clear_distance:.2f}m while turning with an angular velocity of {ang_velocity:.2f} rad/s...\n\n"
+                f"Goal: Find free space with mininum free space of {min_clear_distance:.2f}m while turning with an angular velocity of {ang_velocity_magnitude:.2f} rad/s...\n\n"
                 f"Commencing the action...\n"
                 f"#####\n")
             
@@ -65,7 +65,7 @@ class FindFreeSpaceActionServer():
             self.closest_object_location = self.tb3_lidar.closest_object_position
 
             # set the robot's angular velocity (as specified in the "goal")...
-            self.vel_controller.set_move_cmd(0, ang_velocity)
+            self.vel_controller.set_move_cmd(0, ang_velocity_magnitude)
 
             # establish a conditional statement so that the
             # while loop continues as long as the distance to the closest object
@@ -120,7 +120,7 @@ class FindFreeSpaceActionServer():
 
     # Handle invalid requests
     def is_req_valid(self, goal: FindFreeSpaceGoal):
-        ang_velocity = goal.ang_velocity
+        ang_velocity_magnitude = goal.ang_velocity_magnitude
         min_clear_distance = goal.min_clear_distance
         
         # Implement some checks on the "goal" input parameter(s)
@@ -136,8 +136,8 @@ class FindFreeSpaceActionServer():
             print(f'Invalid minimum clear distance {min_clear_distance:.2f}m. Please choose a distance between 0.12m and 3.5m.')
             is_valid = False
         
-        if not abs(ang_velocity) < 1.82:
-            print(f'Invalid angular velocity {ang_velocity:.2f}m/s. Please choose an angular velocity between -1.82 rad/s and 1.82 rad/s.')
+        if not abs(ang_velocity_magnitude) < 1.82:
+            print(f'Invalid angular velocity {ang_velocity_magnitude:.2f}m/s. Please choose an angular velocity between -1.82 rad/s and 1.82 rad/s.')
             is_valid = False
 
         return is_valid

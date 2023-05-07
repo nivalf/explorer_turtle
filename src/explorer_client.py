@@ -70,7 +70,7 @@ class ExplorerActionClient():
         self.search_goal.fwd_velocity = 0.15
         self.search_goal.approach_distance = 0.3
 
-        self.find_free_space_goal.ang_velocity = 1
+        self.find_free_space_goal.ang_velocity_magnitude = 1
         self.find_free_space_goal.min_clear_distance = 0.6
         
         while not rospy.is_shutdown():
