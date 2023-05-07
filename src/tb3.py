@@ -47,26 +47,38 @@ class Tb3Odometry(object):
         return float(value) / (10**precision)
 
 class Tb3LaserScan(object):
-    def laserscan_cb(self, scan_data):
-        # Clip the scan data to the valid range of lidar [0.12m, 3.5m]
-        ranges = np.clip(scan_data.ranges, 0.12, 3.5)
-
+    # Get the min_distance and the direction
+    def get_closest_object_details(self, ranges):
 
         left_arc = ranges[0:41]
         right_arc = ranges[-41:]
         front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
 
-        self.min_distance = front_arc.min()
+        min_distance = front_arc.min()
         arc_angles = np.arange(-41, 41)
-        self.closest_object_position = arc_angles[np.argmin(front_arc)]
+        closest_object_position = arc_angles[np.argmin(front_arc)]
 
-        # Find the max distance & its corresponding angle
-        # The ranges fall in [0,360]. This has to be wrapped to [-180,180]
-        # [0,180] : Counter clockwise - left side of the robot
-        # [0,-180] : Clockwise - right side of the robot
-        self.max_distance = ranges.max()
-        index = np.argmax(ranges)
-        self.farthest_object_position = index if index < 181 else index - 360
+        return (min_distance, closest_object_position)
+    
+    # Get max distance and direction
+    def get_farthest_object_details(self, ranges):
+
+        left_arc = ranges[0:90]
+        right_arc = ranges[-90:]
+        front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
+
+        max_distance = front_arc.max()
+        arc_angles = np.arange(-90, 90)
+        farthest_object_position = arc_angles[np.argmax(front_arc)]
+
+        return (max_distance, farthest_object_position)
+
+    def laserscan_cb(self, scan_data):
+        # Clip the scan data to the valid range of lidar [0.12m, 3.5m]
+        ranges = np.clip(scan_data.ranges, 0.12, 3.5)
+
+        (self.min_distance, self.closest_object_position) = self.get_closest_object_details(ranges)
+        (self.max_distance, self.farthest_object_position) = self.get_farthest_object_details(ranges)
 
         sector_angle = int(360/self.n_sectors)
 
@@ -86,4 +98,6 @@ class Tb3LaserScan(object):
 
         self.min_distance = 0.0
         self.closest_object_position = 0.0 # degrees
+        self.max_distance = 3.5
+        self.farthest_object_position = 0.0 # degrees
         self.subscriber = rospy.Subscriber('/scan', LaserScan, self.laserscan_cb) 

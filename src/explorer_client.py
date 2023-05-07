@@ -68,7 +68,7 @@ class ExplorerActionClient():
         # assign values to all goal parameters
         # and send the goal to the action server...
         self.search_goal.fwd_velocity = 0.15
-        self.search_goal.approach_distance = 0.3
+        self.search_goal.approach_distance = 0.4
 
         self.find_free_space_goal.ang_velocity_magnitude = 1
         self.find_free_space_goal.min_clear_distance = 0.6
