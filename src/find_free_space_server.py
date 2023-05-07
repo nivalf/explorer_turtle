@@ -14,6 +14,8 @@ from tb3 import Tb3Move, Tb3Odometry, Tb3LaserScan
 # Import some other useful Python Modules
 from math import sqrt, pow
 
+from helpers import sign
+
 
 class FindFreeSpaceActionServer():
     feedback = FindFreeSpaceFeedback()
@@ -32,6 +34,14 @@ class FindFreeSpaceActionServer():
 
         rospy.loginfo("The 'Find Free Space Action Server' is active...")
 
+    # Calculate the angle turned by the turtlebot
+    # - The sign indicates the direction of the turn
+    # - Yaw angle is in the range of [-180 - 180] degrees. 
+    #  => angle wrap around also has to be handled.
+    #  Angle wraparound: 10 degrees counter clockwise from 175 degrees ends in -175 degrees
+    def get_angle_turned(self):
+        return (self.tb3_odom.yaw - self.yaw0 + sign(self.angular_velocity) * 360) % 360
+
     # The action's "callback function":
     def action_server_launcher(self, goal: FindFreeSpaceGoal):
         try:
@@ -39,6 +49,8 @@ class FindFreeSpaceActionServer():
 
             ang_velocity_magnitude = goal.ang_velocity_magnitude
             min_clear_distance = goal.min_clear_distance
+
+            self.angular_velocity = ang_velocity_magnitude
 
 
             if not self.is_req_valid(goal):
@@ -57,15 +69,15 @@ class FindFreeSpaceActionServer():
             # Flag for status of the action
             success = True
 
-            # Get the robot's current odometry from the Tb3Odometry() class:
-            self.posx0 = self.tb3_odom.posx
-            self.posy0 = self.tb3_odom.posy
+            # Get the robot's current orientation from the Tb3Odometry() class:
+            self.yaw0 = self.tb3_odom.yaw
+
             # Get information about objects up ahead from the Tb3LaserScan() class:
             self.closest_object = self.tb3_lidar.min_distance
             self.closest_object_location = self.tb3_lidar.closest_object_position
 
             # set the robot's angular velocity (as specified in the "goal")...
-            self.vel_controller.set_move_cmd(0, ang_velocity_magnitude)
+            self.vel_controller.set_move_cmd(0, self.angular_velocity)
 
             # establish a conditional statement so that the
             # while loop continues as long as the distance to the closest object
@@ -92,13 +104,11 @@ class FindFreeSpaceActionServer():
                     # exit the loop:
                     break
 
-                # determine how far the robot has travelled so far:
-                # DEV: change to find the angle turned
-                self.distance = sqrt(
-                    pow(self.posx0 - self.tb3_odom.posx, 2) + pow(self.posy0 - self.tb3_odom.posy, 2))
+                # determine how far the robot has turned so far:
+                self.angle_turned = self.get_angle_turned()
 
-                # DEV TODO: update all feedback message values and publish a feedback message:
-                self.feedback.current_angle_turned = 0
+                # update all feedback message values and publish a feedback message:
+                self.feedback.current_angle_turned = self.angle_turned
                 self.actionserver.publish_feedback(self.feedback)
 
 
