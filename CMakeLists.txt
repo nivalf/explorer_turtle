@@ -67,8 +67,10 @@ find_package(catkin REQUIRED COMPONENTS
 
 # Generate actions in the 'action' folder
  add_action_files(
-  # All files in the directory will be used to generate actions
-   DIRECTORY action
+  FILES
+  FindFreeSpace.action
+  # # All files in the directory will be used to generate actions
+  #  DIRECTORY action
  )
 
 # Generate added messages and services with any dependencies listed here

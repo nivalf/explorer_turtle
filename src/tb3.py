@@ -48,19 +48,25 @@ class Tb3Odometry(object):
 
 class Tb3LaserScan(object):
     def laserscan_cb(self, scan_data):
-        left_arc = scan_data.ranges[0:41]
-        right_arc = scan_data.ranges[-40:]
-        front_arc = np.array(left_arc[::-1] + right_arc[::-1])
-        
+        # Clip the scan data to the valid range of lidar [0.12m, 3.5m]
+        ranges = np.clip(scan_data.ranges, 0.12, 3.5)
+
+
+        left_arc = ranges[0:41]
+        right_arc = ranges[-41:]
+        front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
+
         self.min_distance = front_arc.min()
-        arc_angles = np.arange(-40, 41)
+        arc_angles = np.arange(-41, 41)
         self.closest_object_position = arc_angles[np.argmin(front_arc)]
 
         sector_angle = int(360/self.n_sectors)
+
         for i in range(self.n_sectors):
-            sector_scan_data = scan_data.ranges[i*sector_angle:(i+1)*sector_angle]
-            min_distance = min(sector_scan_data)
-            min_index = sector_scan_data.index(min_distance)
+            sector_scan_data = ranges[i*sector_angle:(i+1)*sector_angle]
+            min_index = np.argmin(sector_scan_data)
+            min_distance = sector_scan_data[min_index]
+
             angle_increment = scan_data.angle_increment
             min_angle = i*sector_angle + min_index*angle_increment
             self.sector[i] = {"id": i, "min_distance": min_distance, "min_angle": min_angle}

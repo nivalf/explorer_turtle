@@ -65,29 +65,18 @@ class ExplorerActionClient():
         self.action_complete = True
 
     def main_loop(self):
+        # assign values to all goal parameters
+        # and send the goal to the action server...
+        self.search_goal.fwd_velocity = 0.15
+        self.search_goal.approach_distance = 0.3
+
+        self.find_free_space_goal.ang_velocity = 1
+        self.find_free_space_goal.min_clear_distance = 0.6
+        
         while not rospy.is_shutdown():
-            # assign values to all goal parameters
-            # and send the goal to the action server...
-            self.search_goal.fwd_velocity = 0.15
-            self.search_goal.approach_distance = 0.3
-
-            self.find_free_space_goal.ang_velocity = 1
-            self.find_free_space_goal.min_clear_distance = 0.6
-
-            while True:
-
-
-                self.search_client.send_goal(self.search_goal, feedback_cb=self.search_feedback_callback)
-
-                while self.search_client.get_state() < 2:
-                    self.rate.sleep()
-
-                self.find_free_space_client.send_goal(self.find_free_space_goal, feedback_cb=self.find_free_space_feedback_cb)
+            self.search_client.send_goal_and_wait(self.search_goal)
+            self.find_free_space_client.send_goal_and_wait(self.find_free_space_goal)
                 
-                while self.find_free_space_client.get_state() < 2:
-                    self.rate.sleep()
-
-            self.action_complete = True
 
 
 if __name__ == '__main__':
