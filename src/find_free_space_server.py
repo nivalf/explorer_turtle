@@ -137,7 +137,7 @@ class FindFreeSpaceActionServer():
             is_valid = False
         
         if not abs(ang_velocity_magnitude) < 1.82:
-            print(f'Invalid angular velocity {ang_velocity_magnitude:.2f}m/s. Please choose an angular velocity between -1.82 rad/s and 1.82 rad/s.')
+            print(f'Invalid angular velocity {ang_velocity_magnitude:.2f}m/s. Please choose an angular velocity magnitude between 0 and 1.82 rad/s.')
             is_valid = False
 
         return is_valid
