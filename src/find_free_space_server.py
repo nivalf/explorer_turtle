@@ -50,14 +50,16 @@ class FindFreeSpaceActionServer():
             ang_velocity_magnitude = goal.ang_velocity_magnitude
             min_clear_distance = goal.min_clear_distance
 
-            self.angular_velocity = ang_velocity_magnitude
-
-
             if not self.is_req_valid(goal):
                 # abort the action server if an invalid goal has been requested...
                 # DEV: Add a message. Figure out how to do this.
                 self.actionserver.set_aborted()
                 return
+            
+            # Decide the direction of turn
+            # Turn to the open space (direction of farthest object)
+            self.angular_velocity = sign(self.tb3_lidar.farthest_object_position) * ang_velocity_magnitude
+
 
             # TODO: Print a message to indicate that the requested goal was valid
             print(f"\n#####\n"
@@ -85,8 +87,8 @@ class FindFreeSpaceActionServer():
             # (as specified in the "goal")...
             while self.tb3_lidar.min_distance < min_clear_distance:
                 # update LaserScan data:
-                self.closest_object = self.tb3_lidar.min_distance
-                self.closest_object_location = self.tb3_lidar.closest_object_position
+                self.farthest_object = self.tb3_lidar.max_distance
+                self.farthest_object_location = self.tb3_lidar.farthest_object_position
 
                 # publish a velocity command to make the robot start turning
                 self.vel_controller.publish()

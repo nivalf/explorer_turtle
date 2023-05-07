@@ -60,6 +60,14 @@ class Tb3LaserScan(object):
         arc_angles = np.arange(-41, 41)
         self.closest_object_position = arc_angles[np.argmin(front_arc)]
 
+        # Find the max distance & its corresponding angle
+        # The ranges fall in [0,360]. This has to be wrapped to [-180,180]
+        # [0,180] : Counter clockwise - left side of the robot
+        # [0,-180] : Clockwise - right side of the robot
+        self.max_distance = ranges.max()
+        index = np.argmax(ranges)
+        self.farthest_object_position = index if index < 181 else index - 360
+
         sector_angle = int(360/self.n_sectors)
 
         for i in range(self.n_sectors):
