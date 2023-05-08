@@ -54,9 +54,11 @@ class Tb3LaserScan(object):
         right_arc = ranges[-41:]
         front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
 
-        min_distance = front_arc.min()
+        threshold = 0.12
+        min_distance = front_arc[np.where(front_arc >= threshold)].min()
+
         arc_angles = np.arange(-41, 41)
-        closest_object_position = arc_angles[np.argmin(front_arc)]
+        closest_object_position, *rest = arc_angles[np.where(front_arc == min_distance)]
 
         return (min_distance, closest_object_position)
     
@@ -67,15 +69,17 @@ class Tb3LaserScan(object):
         right_arc = ranges[-90:]
         front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
 
-        max_distance = front_arc.max()
+
+        threshold = 3.5
+        max_distance = front_arc[np.where(front_arc <= threshold)].max()
+
         arc_angles = np.arange(-90, 90)
-        farthest_object_position = arc_angles[np.argmax(front_arc)]
+        farthest_object_position, *rest = arc_angles[np.where(front_arc == max_distance)]
 
         return (max_distance, farthest_object_position)
 
     def laserscan_cb(self, scan_data):
-        # Clip the scan data to the valid range of lidar [0.12m, 3.5m]
-        ranges = np.clip(scan_data.ranges, 0.12, 3.5)
+        ranges = np.array(scan_data.ranges)
 
         (self.min_distance, self.closest_object_position) = self.get_closest_object_details(ranges)
         (self.max_distance, self.farthest_object_position) = self.get_farthest_object_details(ranges)

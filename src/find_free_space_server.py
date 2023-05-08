@@ -60,12 +60,12 @@ class FindFreeSpaceActionServer():
             # Turn to the open space (direction of farthest object)
             self.angular_velocity = sign(self.tb3_lidar.farthest_object_position) * ang_velocity_magnitude
 
-
             # TODO: Print a message to indicate that the requested goal was valid
             print(f"\n#####\n"
                 f"The 'find_free_space_action_server' has been called.\n"
                 f"Goal: Find free space with mininum free space of {min_clear_distance:.2f}m while turning with an angular velocity of {ang_velocity_magnitude:.2f} rad/s...\n\n"
                 f"Commencing the action...\n"
+                f"Farthest Object detected at {self.tb3_lidar.max_distance:.2f}m in the direction {self.tb3_lidar.farthest_object_position:.2f} degrees"
                 f"#####\n")
             
             # Flag for status of the action
