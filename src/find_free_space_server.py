@@ -58,7 +58,7 @@ class FindFreeSpaceActionServer():
             
             # Decide the direction of turn
             # Turn to the open space (direction of farthest object)
-            self.angular_velocity = self.tb3_lidar.open_space_direction * ang_velocity_magnitude
+            self.angular_velocity = self.tb3_lidar.close_space_direction * ang_velocity_magnitude
 
             # TODO: Print a message to indicate that the requested goal was valid
             print(f"\n#####\n"

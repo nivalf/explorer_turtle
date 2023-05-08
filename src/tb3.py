@@ -80,17 +80,18 @@ class Tb3LaserScan(object):
         open_values_to_right = (arc_angles < 0).sum()
 
         open_space_direction = 1 if open_values_to_left > open_values_to_right else -1
+        close_space_direction = -open_space_direction
 
         # Set the first farthest position as value to return
         farthest_object_position = farthest_positions[0]
 
-        return (max_distance, farthest_object_position, open_space_direction)
+        return (max_distance, farthest_object_position, open_space_direction, close_space_direction)
 
     def laserscan_cb(self, scan_data):
         ranges = np.array(scan_data.ranges)
 
         (self.min_distance, self.closest_object_position) = self.get_closest_object_details(ranges)
-        (self.max_distance, self.farthest_object_position, self.open_space_direction) = self.get_farthest_object_details(ranges)
+        (self.max_distance, self.farthest_object_position, self.open_space_direction, self.close_space_direction) = self.get_farthest_object_details(ranges)
 
         sector_angle = int(360/self.n_sectors)
 
