@@ -6,7 +6,12 @@ import rospy
 import actionlib
 
 # Import all the necessary ROS message types:
-from turtlebot_explorer.msg import FindFreeSpaceAction, FindFreeSpaceFeedback, FindFreeSpaceResult, FindFreeSpaceGoal
+from turtlebot_explorer.msg import (
+    FindFreeSpaceAction,
+    FindFreeSpaceFeedback,
+    FindFreeSpaceResult,
+    FindFreeSpaceGoal,
+)
 
 # Import the tb3 modules from tb3.py
 from tb3 import Tb3Move, Tb3Odometry, Tb3LaserScan
@@ -17,14 +22,18 @@ from math import sqrt, pow
 from helpers import sign
 
 
-class FindFreeSpaceActionServer():
+class FindFreeSpaceActionServer:
     feedback = FindFreeSpaceFeedback()
     result = FindFreeSpaceResult()
 
     def __init__(self):
         # create a "simple action server" with a callback function, and start it...
         self.actionserver = actionlib.SimpleActionServer(
-            "find_free_space_action_server", FindFreeSpaceAction, self.action_server_launcher, auto_start=False)
+            "find_free_space_action_server",
+            FindFreeSpaceAction,
+            self.action_server_launcher,
+            auto_start=False,
+        )
         self.actionserver.start()
 
         # pull in some useful publisher/subscriber functions from the tb3.py module:
@@ -32,11 +41,15 @@ class FindFreeSpaceActionServer():
         self.tb3_odom = Tb3Odometry()
         self.tb3_lidar = Tb3LaserScan()
 
+        # Get the value of the "explore_space" parameter
+        self.explore_space = rospy.get_param("~explore_space")
+
         rospy.loginfo("The 'Find Free Space Action Server' is active...")
+        rospy.loginfo(f"Received params: explore_space = ${self.explore_space}")
 
     # Calculate the angle turned by the turtlebot
     # - The sign indicates the direction of the turn
-    # - Yaw angle is in the range of [-180 - 180] degrees. 
+    # - Yaw angle is in the range of [-180 - 180] degrees.
     #  => angle wrap around also has to be handled.
     #  Angle wraparound: 10 degrees counter clockwise from 175 degrees ends in -175 degrees
     def get_angle_turned(self):
@@ -55,19 +68,25 @@ class FindFreeSpaceActionServer():
                 # DEV: Add a message. Figure out how to do this.
                 self.actionserver.set_aborted()
                 return
-            
+
             # Decide the direction of turn
             # Turn to the open space (direction of farthest object)
-            self.angular_velocity = self.tb3_lidar.close_space_direction * ang_velocity_magnitude
+            self.angular_velocity = (
+                self.tb3_lidar.open_space_direction
+                if self.explore_space == "open"
+                else self.tb3_lidar.close_space_direction
+            ) * ang_velocity_magnitude
 
             # TODO: Print a message to indicate that the requested goal was valid
-            print(f"\n#####\n"
+            print(
+                f"\n#####\n"
                 f"The 'find_free_space_action_server' has been called.\n"
                 f"Goal: Find free space with mininum free space of {min_clear_distance:.2f}m while turning with an angular velocity of {ang_velocity_magnitude:.2f} rad/s...\n\n"
                 f"Commencing the action...\n"
                 f"Farthest Object detected at {self.tb3_lidar.max_distance:.2f}m in the direction {self.tb3_lidar.farthest_object_position:.2f} degrees"
-                f"#####\n")
-            
+                f"#####\n"
+            )
+
             # Flag for status of the action
             success = True
 
@@ -97,7 +116,7 @@ class FindFreeSpaceActionServer():
                 if self.actionserver.is_preempt_requested():
                     # take appropriate action if the action is cancelled (peempted)...
                     rospy.loginfo("Cancelling the Search for free space.")
-                
+
                     # DEV: Add a message. Figure out how to do this.
                     self.actionserver.set_preempted()
                     # stop the robot:
@@ -113,7 +132,6 @@ class FindFreeSpaceActionServer():
                 self.feedback.current_angle_turned = self.angle_turned
                 self.actionserver.publish_feedback(self.feedback)
 
-
                 rate.sleep()
 
             if success:
@@ -126,7 +144,7 @@ class FindFreeSpaceActionServer():
                 # TODO: Set the action server to "succeeded" and stop the robot...
                 self.actionserver.set_succeeded(self.result)
                 self.vel_controller.stop()
-                
+
         except rospy.ROSInterruptException:
             pass
 
@@ -134,29 +152,36 @@ class FindFreeSpaceActionServer():
     def is_req_valid(self, goal: FindFreeSpaceGoal):
         ang_velocity_magnitude = goal.ang_velocity_magnitude
         min_clear_distance = goal.min_clear_distance
-        
+
         # Implement some checks on the "goal" input parameter(s)
         is_valid = True
 
         if min_clear_distance < 0:
-            print(f'Invalid minimum clear distance {min_clear_distance:.2f}m. Please choose a distance between 0.12m and 3.5m.')
+            print(
+                f"Invalid minimum clear distance {min_clear_distance:.2f}m. Please choose a distance between 0.12m and 3.5m."
+            )
             is_valid = False
         elif min_clear_distance < 0.12:
-            print(f'Invalid minimum clear distance {min_clear_distance:.2f}m. Please choose a distance between 0.12m and 3.5m.')
+            print(
+                f"Invalid minimum clear distance {min_clear_distance:.2f}m. Please choose a distance between 0.12m and 3.5m."
+            )
             is_valid = False
         elif min_clear_distance >= 3.5:
-            print(f'Invalid minimum clear distance {min_clear_distance:.2f}m. Please choose a distance between 0.12m and 3.5m.')
+            print(
+                f"Invalid minimum clear distance {min_clear_distance:.2f}m. Please choose a distance between 0.12m and 3.5m."
+            )
             is_valid = False
-        
+
         if not abs(ang_velocity_magnitude) < 1.82:
-            print(f'Invalid angular velocity {ang_velocity_magnitude:.2f}m/s. Please choose an angular velocity magnitude between 0 and 1.82 rad/s.')
+            print(
+                f"Invalid angular velocity {ang_velocity_magnitude:.2f}m/s. Please choose an angular velocity magnitude between 0 and 1.82 rad/s."
+            )
             is_valid = False
 
         return is_valid
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     rospy.init_node("find_free_space_action_server")
     FindFreeSpaceActionServer()
     rospy.spin()
-
