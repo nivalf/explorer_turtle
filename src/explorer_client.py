@@ -8,11 +8,13 @@ from tuos_ros_msgs.msg import SearchAction, SearchGoal, SearchFeedback
 from turtlebot_explorer.msg import FindFreeSpaceAction, FindFreeSpaceGoal, FindFreeSpaceFeedback
 
 search_action_server_name = "/search_action_server"
+reverse_search_action_server_name = "/reverse_search_action_server"
 find_free_space_action_server_name = "/find_free_space_action_server"
 
 
 class ExplorerActionClient():
     search_goal = SearchGoal()
+    reverse_search_goal = SearchGoal()
     find_free_space_goal = FindFreeSpaceGoal()
 
     def search_feedback_callback(self, feedback_data: SearchFeedback):
@@ -42,6 +44,12 @@ class ExplorerActionClient():
                                                    SearchAction)
         self.search_client.wait_for_server()
 
+        # setup a "simple action client" with a callback function
+        # and wait for the server to be available...
+        self.reverse_search_client = actionlib.SimpleActionClient(reverse_search_action_server_name,
+                                                   SearchAction)
+        self.reverse_search_client.wait_for_server()
+
         # Setup client for finding free space
         self.find_free_space_client = actionlib.SimpleActionClient(find_free_space_action_server_name, FindFreeSpaceAction)
         self.find_free_space_client.wait_for_server()
@@ -53,6 +61,7 @@ class ExplorerActionClient():
             rospy.logwarn("Received a shutdown request. Cancelling Goal...")
             # cancel the goal request, if this node is shutdown before the action has completed...
             self.search_client.cancel_goal()
+            self.reverse_search_client.cancel_goal()
             self.find_free_space_client.cancel_goal()
 
             rospy.logwarn("Goal Cancelled...")
@@ -60,8 +69,12 @@ class ExplorerActionClient():
         # TODO: Print the result here...
         print(f"RESULT: Search Action State = {self.search_client.get_state()}")
         print(f"RESULT: Total Distance Travelled: {self.distance}m")
+        print(f"RESULT: Reverse Search Action State = {self.reverse_search_client.get_state()}")
+        print(f"RESULT: Total Distance Travelled: {self.distance}m")
         print(f"RESULT: Find Free Space Action State = {self.find_free_space_client.get_state()}")
         print(f"RESULT: Total Angle Turned: {self.angle} degrees")
+
+        
         self.action_complete = True
 
     def main_loop(self):
@@ -70,10 +83,14 @@ class ExplorerActionClient():
         self.search_goal.fwd_velocity = 0.25
         self.search_goal.approach_distance = 0.45
 
+        self.reverse_search_goal.fwd_velocity = -0.25
+        self.reverse_search_goal.approach_distance = 0.45
+
         self.find_free_space_goal.ang_velocity_magnitude = 1
         self.find_free_space_goal.min_clear_distance = 0.45
         
         while not rospy.is_shutdown():
+            self.reverse_search_client.send_goal_and_wait(self.reverse_search_goal)
             self.search_client.send_goal_and_wait(self.search_goal)
             self.find_free_space_client.send_goal_and_wait(self.find_free_space_goal)
                 

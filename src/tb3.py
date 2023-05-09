@@ -62,6 +62,19 @@ class Tb3LaserScan(object):
 
         return (min_distance, closest_object_position)
     
+
+    # Get the min_distance and the direction of the object behind the robot
+    def get_closest_object_behind_details(self, ranges):
+
+        back_arc = np.array(ranges[150:210])
+
+        threshold = 0.12
+        min_distance_behind = back_arc[np.where(back_arc >= threshold)].min()
+
+        # If required, find the direction of the object
+
+        return min_distance_behind
+    
     # Get max distance and direction
     def get_farthest_object_details(self, ranges):
 
@@ -91,6 +104,7 @@ class Tb3LaserScan(object):
         ranges = np.array(scan_data.ranges)
 
         (self.min_distance, self.closest_object_position) = self.get_closest_object_details(ranges)
+        self.min_distance_behind = self.get_closest_object_behind_details(ranges)
         (self.max_distance, self.farthest_object_position, self.open_space_direction, self.close_space_direction) = self.get_farthest_object_details(ranges)
 
         sector_angle = int(360/self.n_sectors)
@@ -111,6 +125,7 @@ class Tb3LaserScan(object):
 
         self.min_distance = 0.0
         self.closest_object_position = 0.0 # degrees
+        self.min_distance_behind = 0.0
         self.max_distance = 3.5
         self.farthest_object_position = 0.0 # degrees
         self.open_space_direction = 1

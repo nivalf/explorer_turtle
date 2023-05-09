@@ -34,6 +34,8 @@
 
     <!-- Search server -->
     <node pkg="turtlebot_explorer" type="search_server.py" name="search_server" output="screen"/>
+    <!-- Reverse Search server -->
+    <node pkg="turtlebot_explorer" type="reverse_search_server.py" name="reverse_search_server" output="screen"/>
     <!-- Find free space server -->
     <node pkg="turtlebot_explorer" type="find_free_space_server.py" name="find_free_space_server" output="screen">
         <param name="explore_space" value="$(arg explore_space)" />
