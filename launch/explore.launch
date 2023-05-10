@@ -22,7 +22,7 @@
     <!-- rviz -->
     <group if="$(arg open_rviz)"> 
         <node pkg="rviz" type="rviz" name="rviz" required="true"
-            args="-d $(find turtlebot3_slam)/rviz/turtlebot3_$(arg slam_methods).rviz"/>
+            args="-d $(find turtlebot_explorer)/rviz/explorer.rviz"/>
     </group>
 
     <!-- Demo arena Gazebo -->
@@ -38,5 +38,7 @@
     </node>
     <!-- Explorer client -->
     <node pkg="turtlebot_explorer" type="explorer_client.py" name="explorer_client" output="screen"/>
+    <!-- Path Publisher -->
+    <node pkg="turtlebot_explorer" type="path_publisher.py" name="path_publisher" output="screen"/>
   
 </launch>
