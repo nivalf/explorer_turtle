@@ -6,7 +6,7 @@ import rospy
 import actionlib
 
 # Import all the necessary ROS message types:
-from turtlebot_explorer.msg import (
+from obstacle_avoider.msg import (
     FindFreeSpaceAction,
     FindFreeSpaceFeedback,
     FindFreeSpaceResult,

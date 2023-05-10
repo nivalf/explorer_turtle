@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(turtlebot_explorer)
+project(obstacle_avoider)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -14,8 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tuos_ros_msgs
-  message_generation
-  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,12 +49,13 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+# Generate actions in the 'action' folder
+add_action_files(
+  FILES
+  FindFreeSpace.action
+  # # All files in the directory will be used to generate actions
+  #  DIRECTORY action
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -65,19 +64,18 @@ find_package(catkin REQUIRED COMPONENTS
 #   Service2.srv
 # )
 
-# Generate actions in the 'action' folder
- add_action_files(
-  FILES
-  FindFreeSpace.action
-  # # All files in the directory will be used to generate actions
-  #  DIRECTORY action
- )
+## Generate actions in the 'action' folder
+# add_action_files(
+#   FILES
+#   Action1.action
+#   Action2.action
+# )
 
 # Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   actionlib_msgs
- )
+generate_messages(
+  DEPENDENCIES
+  actionlib_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -110,7 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES turtlebot_explorer
+#  LIBRARIES obstacle_avoider
 #  CATKIN_DEPENDS actionlib geometry_msgs nav_msgs rospy std_msgs tuos_ros_msgs
 #  DEPENDS system_lib
 )
@@ -128,7 +126,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/turtlebot_explorer.cpp
+#   src/${PROJECT_NAME}/obstacle_avoider.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -139,7 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/turtlebot_explorer_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/obstacle_avoider_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -203,7 +201,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_turtlebot_explorer.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_obstacle_avoider.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

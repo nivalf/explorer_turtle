@@ -1,4 +1,4 @@
-image: /home/flavinlj/catkin_ws/src/turtlebot_explorer/maps/team22_map.pgm
+image: /home/flavinlj/catkin_ws/src/turtlebot_explorer/obstacle_avoider/maps/team22_map.pgm
 resolution: 0.050000
 origin: [-10.000000, -10.000000, 0.000000]
 negate: 0

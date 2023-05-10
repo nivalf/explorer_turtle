@@ -22,23 +22,23 @@
     <!-- rviz -->
     <group if="$(arg open_rviz)"> 
         <node pkg="rviz" type="rviz" name="rviz" required="true"
-            args="-d $(find turtlebot_explorer)/rviz/explorer.rviz"/>
+            args="-d $(find obstacle_avoider)/rviz/explorer.rviz"/>
     </group>
 
     <!-- Demo arena Gazebo -->
     <include file="$(find acs6121)/launch/arena.launch" />
 
     <!-- Search server -->
-    <node pkg="turtlebot_explorer" type="search_server.py" name="search_server" output="screen"/>
+    <node pkg="obstacle_avoider" type="search_server.py" name="search_server" output="screen"/>
     <!-- Reverse Search server -->
-    <node pkg="turtlebot_explorer" type="reverse_search_server.py" name="reverse_search_server" output="screen"/>
+    <node pkg="obstacle_avoider" type="reverse_search_server.py" name="reverse_search_server" output="screen"/>
     <!-- Find free space server -->
-    <node pkg="turtlebot_explorer" type="find_free_space_server.py" name="find_free_space_server" output="screen">
+    <node pkg="obstacle_avoider" type="find_free_space_server.py" name="find_free_space_server" output="screen">
         <param name="explore_space" value="$(arg explore_space)" />
     </node>
     <!-- Explorer client -->
-    <node pkg="turtlebot_explorer" type="explorer_client.py" name="explorer_client" output="screen"/>
+    <node pkg="obstacle_avoider" type="explorer_client.py" name="explorer_client" output="screen"/>
     <!-- Path Publisher -->
-    <node pkg="turtlebot_explorer" type="path_publisher.py" name="path_publisher" output="screen"/>
+    <node pkg="obstacle_avoider" type="path_publisher.py" name="path_publisher" output="screen"/>
   
 </launch>

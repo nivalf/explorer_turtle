@@ -6,13 +6,13 @@ import actionlib
 import roslaunch
 
 from tuos_ros_msgs.msg import SearchAction, SearchGoal, SearchFeedback
-from turtlebot_explorer.msg import FindFreeSpaceAction, FindFreeSpaceGoal, FindFreeSpaceFeedback
+from obstacle_avoider.msg import FindFreeSpaceAction, FindFreeSpaceGoal, FindFreeSpaceFeedback
 
 search_action_server_name = "/search_action_server"
 reverse_search_action_server_name = "/reverse_search_action_server"
 find_free_space_action_server_name = "/find_free_space_action_server"
 
-map_path = "$(find turtlebot_explorer)/maps/team22_map"
+map_path = "$(find obstacle_avoider)/maps/team22_map"
 
 
 
