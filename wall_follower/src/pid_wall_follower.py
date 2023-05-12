@@ -3,34 +3,31 @@
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+import numpy as np
 from dynamic_reconfigure.server import Server
 from wall_follower.cfg import WallFollowerConfig
 
 class PIDWallFollower:
     def __init__(self):
-        # initialize the node
-        rospy.init_node('pid_wall_follower')
-
-        # setup publisher for movement commands
-        self.cmd_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
-
-        # setup subscriber for laser scan messages
+        self.cmd_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.scan_callback)
 
-        # setup a default movement command
-        self.cmd = Twist()
+        # PID Coefficients
+        self.Kp = 1.0  # Proportional gain
+        self.Ki = 0.5  # Integral gain
+        self.Kd = 0.8  # Derivative gain
 
-        # PID coefficients
-        self.kp = 1
-        self.ki = 0.5
-        self.kd = 0.8
-
-        # error values
+        # Error Values
+        self.error = 0.0
+        self.error_sum = 0.0
         self.prev_error = 0.0
-        self.cum_error = 0.0
 
-        # desired distance from the wall
-        self.desired_distance = 1.5
+        # Max Limits
+        self.max_integral = 10.0  # Maximum integral term
+        self.max_linear_velocity = 0.2  # Linear velocity limit (m/s)
+        self.max_angular_velocity = 1.5  # Angular velocity limit (rad/s)
+
+        self.cmd_msg = Twist()
 
         # setup dynamic reconfigure server
         self.srv = Server(WallFollowerConfig, self.reconfigure_callback)
@@ -43,32 +40,64 @@ class PIDWallFollower:
         return config
 
     def scan_callback(self, msg):
-        # this method gets called every time a LaserScan message is received
+        # Considering only a small range in front
 
-        # find the minimum range (closest object)
-        min_range = min(msg.ranges)
+        left_arc = msg.ranges[0:10]
+        right_arc = msg.ranges[-10:]
+        front_ranges = np.concatenate((left_arc[::-1], right_arc[::-1]))
+        front_distance = min(front_ranges)
 
-        # compute the error
-        error = self.desired_distance - min_range
+        # Considering a small range on the right
+        right_ranges = msg.ranges[260:280]
+        right_distance = min(right_ranges)
 
-        # compute the control output (correction needed)
-        correction = self.kp*error + self.ki*self.cum_error + self.kd*(error - self.prev_error)
+        # Angle error calculation
+        desired_angle = np.arctan2(0.5, right_distance)
+        current_angle = np.arctan2(0.5, front_distance)
 
-        # apply the correction to the robot's motion command
-        self.cmd.linear.x = 0.1  # constant forward speed
-        self.cmd.angular.z = correction
+        self.error = desired_angle - current_angle
 
-        # update error values
-        self.prev_error = error
-        self.cum_error += error
+        # PID controller
+        proportional = self.Kp * self.error
+        self.error_sum += self.error
+        integral = self.Ki * self.error_sum
+        derivative = self.Kd * (self.error - self.prev_error)
 
-        # publish the movement command
-        self.cmd_pub.publish(self.cmd)
+        # Saturation and windup handling
+        if integral > self.max_integral:
+            integral = self.max_integral
+            self.error_sum = self.max_integral / self.Ki
+        elif integral < -self.max_integral:
+            integral = -self.max_integral
+            self.error_sum = -self.max_integral / self.Ki
+
+        control = proportional + integral + derivative
+
+        # Velocity saturation
+        linear_velocity = 0.2
+        angular_velocity = control
+
+        if angular_velocity > self.max_angular_velocity:
+            angular_velocity = self.max_angular_velocity
+        elif angular_velocity < -self.max_angular_velocity:
+            angular_velocity = -self.max_angular_velocity
+
+        # Set the control command
+        self.cmd_msg.linear.x = linear_velocity
+        self.cmd_msg.angular.z = angular_velocity
+
+        self.prev_error = self.error
 
     def run(self):
-        # keep the node running until it's shut down
-        rospy.spin()
+        rate = rospy.Rate(10)  # 10 Hz
 
-if __name__ == '__main__':
+        while not rospy.is_shutdown():
+            self.cmd_pub.publish(self.cmd_msg)
+            rate.sleep()
+
+if __name__ == "__main__":
+    rospy.init_node('pid_wall_follower')
+    
     # create an instance of PIDWallFollower and run it
-    PIDWallFollower().run()
+    wall_follower = PIDWallFollower()
+    wall_follower.run()
