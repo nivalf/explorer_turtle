@@ -9,6 +9,10 @@ from math import degrees
 import numpy as np
 
 
+min_range = 0.12
+max_range = 3.5 
+
+
 class Tb3Move(object):
     def __init__(self):
         self.publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
@@ -57,8 +61,6 @@ class Tb3LaserScan(object):
         right_arc = ranges[-30:]
         front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
 
-        min_range = 0.12
-        max_range = 3.5 
         #Ignoring filtering max_range since only min is of interest here
         min_distance = front_arc[np.where(front_arc >= min_range)].min()    
 
@@ -107,6 +109,18 @@ class Tb3LaserScan(object):
         farthest_object_position = farthest_positions[0]
 
         return (max_distance, farthest_object_position, open_space_direction)
+    
+    def get_sector_details(self, ranges):
+        sector = []
+        for i in range(self.n_sectors):
+            sector_scan_data = ranges[i * self.sector_angle : (i + 1) * self.sector_angle]
+            #Ignoring filtering max_range since only min is of interest here
+            min_distance = sector_scan_data[np.where(sector_scan_data >= min_range)].min()
+            sector.append({
+                "id": i,
+                "min_distance": min_distance,
+            })
+        return sector
 
     def laserscan_cb(self, scan_data):
         ranges = np.array(scan_data.ranges)
@@ -116,31 +130,22 @@ class Tb3LaserScan(object):
             self.closest_object_position,
             self.open_side,
         ) = self.get_closest_object_details(ranges)
+
         self.min_distance_behind = self.get_closest_object_behind_details(ranges)
+
         (
             self.max_distance,
             self.farthest_object_position,
             self.open_space_direction,
         ) = self.get_farthest_object_details(ranges)
 
-        sector_angle = int(360 / self.n_sectors)
+        self.sector = self.get_sector_details(ranges)
 
-        for i in range(self.n_sectors):
-            sector_scan_data = ranges[i * sector_angle : (i + 1) * sector_angle]
-            min_index = np.argmin(sector_scan_data)
-            min_distance = sector_scan_data[min_index]
-
-            angle_increment = scan_data.angle_increment
-            min_angle = i * sector_angle + min_index * angle_increment
-            self.sector[i] = {
-                "id": i,
-                "min_distance": min_distance,
-                "min_angle": min_angle,
-            }
 
     def __init__(self):
-        self.n_sectors = 8
-        self.sector = [{} for _ in range(self.n_sectors)]
+        self.sector_angle = 30
+        self.n_sectors = 360//self.sector_angle 
+        self.sector = [{"min_distance": 0} for _ in range(self.n_sectors)]
 
         self.min_distance = 0.0
         self.closest_object_position = 0.0  # degrees

@@ -6,7 +6,7 @@
     <arg name="open_rviz" default="true"/>
 
     <!-- Additional Arguments -->
-    <arg name="approach_distance" default="0.4"/>
+    <arg name="approach_distance" default="0.45"/>
     <arg name="linear_velocity" default="0.25"/>
     <arg name="ang_velocity_magnitude" default="1"/>
 
