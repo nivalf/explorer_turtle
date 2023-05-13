@@ -93,10 +93,6 @@ class ExplorerActionClient():
         self.find_free_space_goal.ang_velocity_magnitude = rospy.get_param("~ang_velocity_magnitude")
         self.find_free_space_goal.min_clear_distance = rospy.get_param("~approach_distance")
 
-
-        # Get the value of the "explore_space" parameter
-        # self.explore_space = 
-
         
         while not rospy.is_shutdown():
             # self.reverse_search_client.send_goal_and_wait(self.reverse_search_goal)
