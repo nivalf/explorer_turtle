@@ -3,7 +3,6 @@
 
 import rospy
 import actionlib
-import roslaunch
 
 from tuos_ros_msgs.msg import SearchAction, SearchGoal, SearchFeedback
 from obstacle_avoider.msg import FindFreeSpaceAction, FindFreeSpaceGoal, FindFreeSpaceFeedback
