@@ -6,7 +6,9 @@
     <arg name="open_rviz" default="true"/>
 
     <!-- Additional Arguments -->
-    <arg name="explore_space" default="open"/>
+    <arg name="approach_distance" default="0.4"/>
+    <arg name="linear_velocity" default="0.25"/>
+    <arg name="ang_velocity_magnitude" default="1"/>
 
     <!-- Turtlebot3 Bringup -->
     <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
@@ -33,12 +35,17 @@
     <!-- Reverse Search server -->
     <node pkg="obstacle_avoider" type="reverse_search_server.py" name="reverse_search_server" output="screen"/>
     <!-- Find free space server -->
-    <node pkg="obstacle_avoider" type="find_free_space_server.py" name="find_free_space_server" output="screen">
-        <param name="explore_space" value="$(arg explore_space)" />
-    </node>
+    <node pkg="obstacle_avoider" type="find_free_space_server.py" name="find_free_space_server" output="screen"/>
+        
     <!-- Explorer client -->
-    <node pkg="obstacle_avoider" type="explorer_client.py" name="explorer_client" output="screen"/>
+    <node pkg="obstacle_avoider" type="explorer_client.py" name="explorer_client" output="screen">
+        <param name="approach_distance" value="$(arg approach_distance)" />
+        <param name="linear_velocity" value="$(arg linear_velocity)" />
+        <param name="ang_velocity_magnitude" value="$(arg ang_velocity_magnitude)" />
+    </node>
     <!-- Path Publisher -->
     <node pkg="obstacle_avoider" type="path_publisher.py" name="path_publisher" output="screen"/>
+    <!-- Visualisation Marker -->
+    <!-- <node pkg="obstacle_avoider" type="marker.py" name="sector_viz" output="screen"/> -->
   
 </launch>

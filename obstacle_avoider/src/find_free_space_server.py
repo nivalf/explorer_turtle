@@ -31,7 +31,7 @@ class FindFreeSpaceActionServer:
         self.actionserver = actionlib.SimpleActionServer(
             "find_free_space_action_server",
             FindFreeSpaceAction,
-            self.action_server_launcher,
+            self.execute_cb,
             auto_start=False,
         )
         self.actionserver.start()
@@ -41,8 +41,6 @@ class FindFreeSpaceActionServer:
         self.tb3_odom = Tb3Odometry()
         self.tb3_lidar = Tb3LaserScan()
 
-        # Get the value of the "explore_space" parameter
-        self.explore_space = rospy.get_param("~explore_space")
 
         rospy.loginfo("The 'Find Free Space Action Server' is active...")
         rospy.loginfo(f"Received params: explore_space = ${self.explore_space}")
@@ -56,7 +54,7 @@ class FindFreeSpaceActionServer:
         return (self.tb3_odom.yaw - self.yaw0 + sign(self.angular_velocity) * 360) % 360
 
     # The action's "callback function":
-    def action_server_launcher(self, goal: FindFreeSpaceGoal):
+    def execute_cb(self, goal: FindFreeSpaceGoal):
         try:
             rate = rospy.Rate(10)
 
@@ -71,11 +69,7 @@ class FindFreeSpaceActionServer:
 
             # Decide the direction of turn
             # Turn to the open space (direction of farthest object)
-            self.angular_velocity = (
-                self.tb3_lidar.open_space_direction
-                if self.explore_space == "open"
-                else self.tb3_lidar.close_space_direction
-            ) * ang_velocity_magnitude
+            self.angular_velocity = self.tb3_lidar.open_side * ang_velocity_magnitude
 
             # TODO: Print a message to indicate that the requested goal was valid
             print(
