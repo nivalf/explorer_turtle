@@ -49,5 +49,7 @@
     <node pkg="obstacle_avoider" type="visualise_markers.py" name="visualise_markers" output="screen">
         <param name="approach_distance" value="$(arg approach_distance)" />
     </node>
+    <!-- Map Saver -->
+    <node pkg="obstacle_avoider" type="map_saver.py" name="map_saver" output="screen"/>
   
 </launch>

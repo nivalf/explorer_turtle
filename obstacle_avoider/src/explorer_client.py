@@ -12,9 +12,6 @@ search_action_server_name = "/search_action_server"
 reverse_search_action_server_name = "/reverse_search_action_server"
 find_free_space_action_server_name = "/find_free_space_action_server"
 
-map_path = "$(find obstacle_avoider)/maps/team22_map"
-
-
 
 class ExplorerActionClient():
     search_goal = SearchGoal()
@@ -34,15 +31,6 @@ class ExplorerActionClient():
         self.angle = feedback_data.current_angle_turned
         print(f"FEEDBACK: Current angle turned: {self.angle} degrees. ")
 
-    # Save the map 
-    def save_map(self, wait=False):
-        map_node = roslaunch.core.Node(package="map_server", node_type="map_saver", args=f"-f {map_path}")
-    
-        process = self.launch.launch(map_node)
-        if(wait):
-            print("Waiting to finish saving the map...")
-            process.wait()
-
 
 
     def __init__(self):
@@ -52,9 +40,6 @@ class ExplorerActionClient():
         self.action_complete = False
         rospy.init_node("explorer_client")
         self.rate = rospy.Rate(1)
-
-        self.launch = roslaunch.scriptapi.ROSLaunch()
-        self.launch.start()
 
         # setup a "simple action client" with a callback function
         # and wait for the server to be available...
@@ -117,9 +102,6 @@ class ExplorerActionClient():
             # self.reverse_search_client.send_goal_and_wait(self.reverse_search_goal)
             self.search_client.send_goal_and_wait(self.search_goal)
             self.find_free_space_client.send_goal_and_wait(self.find_free_space_goal)
-
-            # Save map (Asynchronous)
-            self.save_map()
                 
 
 
