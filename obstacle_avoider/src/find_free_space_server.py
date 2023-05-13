@@ -43,7 +43,6 @@ class FindFreeSpaceActionServer:
 
 
         rospy.loginfo("The 'Find Free Space Action Server' is active...")
-        rospy.loginfo(f"Received params: explore_space = ${self.explore_space}")
 
     # Calculate the angle turned by the turtlebot
     # - The sign indicates the direction of the turn

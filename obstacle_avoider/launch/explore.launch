@@ -46,6 +46,8 @@
     <!-- Path Publisher -->
     <node pkg="obstacle_avoider" type="path_publisher.py" name="path_publisher" output="screen"/>
     <!-- Visualisation Marker -->
-    <!-- <node pkg="obstacle_avoider" type="marker.py" name="sector_viz" output="screen"/> -->
+    <node pkg="obstacle_avoider" type="visualise_markers.py" name="visualise_markers" output="screen">
+        <param name="approach_distance" value="$(arg approach_distance)" />
+    </node>
   
 </launch>
