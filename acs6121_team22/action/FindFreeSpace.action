@@ -1,0 +1,14 @@
+# Define the FindFreeSpace action
+
+# Define the goal of the action
+float32 ang_velocity_magnitude    # Magniture of the desired angular velocity of the robot (rad/s)
+float32 min_clear_distance    # The minimum distance to be considered a free space (meters)
+
+---
+# Define the result of the action
+bool success          # True if the robot successfully found a free space, false otherwise
+float32 turned_angle  # The angle turned by the robot to face the free space (degrees)
+
+---
+# Define the feedback for the action
+float32 current_angle_turned  # The current angle of the robot as it turns (degrees)
