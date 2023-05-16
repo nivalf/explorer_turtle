@@ -8,7 +8,7 @@ class MapSaver():
         self.launch = roslaunch.scriptapi.ROSLaunch()
         self.launch.start()
         self.rate = rospy.Rate(0.2) # T=5s
-        self.map_path = "$(find obstacle_avoider)/maps/team22_map"
+        self.map_path = "$(find obstacle_avoider)/maps/explore_map"
         rospy.on_shutdown(self.shutdown_ops)
 
     def shutdown_ops(self):

@@ -132,7 +132,7 @@ class FindFreeSpaceActionServer:
 
                 # DEV TODO: update all result parameters:
                 self.result.success = success
-                self.result.turned_angle = 0
+                self.result.turned_angle = self.get_angle_turned()
 
                 # TODO: Set the action server to "succeeded" and stop the robot...
                 self.actionserver.set_succeeded(self.result)
