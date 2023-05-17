@@ -65,7 +65,7 @@ class SearchActionServer():
             self.closest_object_location = self.tb3_lidar.closest_object_position
 
             # TODO: set the robot's forward velocity (as specified in the "goal")...
-            self.vel_controller.set_move_cmd(fwd_velocity, 0.0)
+            self.vel_controller.set_move_cmd(fwd_velocity, 0.2)
 
             # TODO: establish a conditional statement so that the
             # while loop continues as long as the distance to the closest object

@@ -55,7 +55,7 @@ class Tb3LaserScan(object):
         front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
 
         threshold = 0.12
-        min_distance = front_arc[np.where(front_arc >= threshold)].min()
+        min_distance = front_arc[np.where(front_arc >= threshold)].min(initial=3.5)
 
         arc_angles = np.arange(-30, 30)
         closest_object_position, *rest = arc_angles[np.where(front_arc == min_distance)]
@@ -69,7 +69,7 @@ class Tb3LaserScan(object):
         back_arc = np.array(ranges[150:210])
 
         threshold = 0.12
-        min_distance_behind = back_arc[np.where(back_arc >= threshold)].min()
+        min_distance_behind = back_arc[np.where(back_arc >= threshold)].min(initial=3.5)
 
         # If required, find the direction of the object
 
